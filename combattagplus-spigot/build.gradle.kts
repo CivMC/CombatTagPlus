@@ -35,19 +35,26 @@ dependencies {
     // implementation(project(":combattagpluscompat-api"))
 }
 
-configure<JavaPluginExtension> {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
+tasks {
+	build {
+		dependsOn(reobfJar)
+	}
 
-tasks.withType<JavaCompile> {
-    options.encoding = Charsets.UTF_8.name()
-    options.release.set(17)
-}
+	compileJava {
+		options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
 
-tasks.withType<Javadoc> {
-    options.encoding = Charsets.UTF_8.name()
-}
+		// Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
+		// See https://openjdk.java.net/jeps/247 for more information.
+		options.release.set(17)
+	}
+	javadoc {
+		options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
+	}
+	processResources {
+		filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
+	}
 
-tasks.withType<ProcessResources> {
-    filteringCharset = Charsets.UTF_8.name()
+	test {
+		useJUnitPlatform()
+	}
 }
