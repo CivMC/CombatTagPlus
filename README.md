@@ -1,6 +1,6 @@
 # CombatTagPlus
 
-*CombatTagPlus is the last plugin you'll ever need to stop those dirty combat loggers!*
+*CombatTagPlus is the last plugin you'll ever need to stop those dirty combat loggers*
 
 ## Supports
 
