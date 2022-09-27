@@ -1,5 +1,11 @@
 package net.minelink.ctplus;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.HOURS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,13 +21,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
-
-import static java.util.concurrent.TimeUnit.*;
 
 public final class Settings {
 
@@ -310,6 +313,14 @@ public final class Settings {
 
     public boolean disableCrafting() {
         return plugin.getConfig().getBoolean("disable-crafting");
+    }
+
+    public boolean cooldownBlockPlacingInCombat() {
+        return plugin.getConfig().getBoolean("cooldown-block-placing-in-combat", false);
+    }
+
+    public long getBlockPlacingCooldownTimeInCombat() {
+        return plugin.getConfig().getLong("cooldown-block-placing-time", 60L);
     }
 
     public String getDisableCraftingMessage() {

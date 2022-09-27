@@ -96,6 +96,12 @@ untag-on-plugin-teleport: false
 # This message is displayed when a player attempts to teleport within pvp if teleportation is disabled in pvp.
 disable-teleportation-message: '&bTeleportation &cis disabled in combat.'
 
+#Should block placement have a cooldown while a player is tagged?
+cooldown-block-placing-in-combat: false
+
+#Cooldown time between block placements while tagged. This value is in ticks. 20 ticks = 1 second
+cooldown-block-placing-time: 100
+
 # Prevents tagged players from crafting during combat.
 disable-crafting: false
 
