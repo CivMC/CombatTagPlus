@@ -33,6 +33,8 @@ public class NpcPlayer extends ServerPlayer {
             gameProfile.getProperties().put(entry.getKey(), entry.getValue());
         }
 
+        gameProfile.getProperties().put("is-cbtp-npc", true);
+
         NpcPlayer npcPlayer = new NpcPlayer(minecraftServer, worldServer, gameProfile);
         npcPlayer.identity = new NpcIdentity(player);
 
