@@ -1,17 +1,21 @@
 package net.minelink.ctplus.listener;
 
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minelink.ctplus.CombatTagPlus;
 import net.minelink.ctplus.Tag;
 import net.minelink.ctplus.event.CombatLogEvent;
 import net.minelink.ctplus.event.PlayerCombatTagEvent;
 import net.minelink.ctplus.task.SafeLogoutTask;
 import net.minelink.ctplus.task.TagUpdateTask;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,13 +35,16 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class PlayerListener implements Listener {
 
-    private final CombatTagPlus plugin;
+    private CombatTagPlus plugin;
+    private TickCoolDownHandler handler;
 
     public PlayerListener(CombatTagPlus plugin) {
         this.plugin = plugin;
+        this.handler = new TickCoolDownHandler(plugin, plugin.getSettings().getBlockPlacingCooldownTimeInCombat());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -405,6 +412,83 @@ public final class PlayerListener implements Listener {
                 plugin.getHookManager().isPvpEnabledAt(event.getFrom())) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void blockPlacementCooldown(BlockPlaceEvent event){
+        if (!plugin.getSettings().cooldownBlockPlacingInCombat()) {
+            return;
+        }
+        Player player = event.getPlayer();
+        if (!plugin.getTagManager().isTagged(player.getUniqueId())) {
+            return;
+        }
+
+        if (handler.onCoolDown(player.getUniqueId())) {
+            event.setCancelled(true);
+            player.sendMessage(Component.text("You may place blocks again in " + formatCoolDown(player.getUniqueId()) + " seconds",
+                    NamedTextColor.RED));
+            return;
+        }
+        handler.putOnCoolDown(player.getUniqueId());
+    }
+
+    private String formatCoolDown(UUID uuid) {
+        long cd = handler.getRemainingCoolDown(uuid);
+        if (cd <= 0) {
+            return ChatColor.GREEN + "READY";
+        }
+        //convert from ticks to ms
+        return new DecimalFormat("#.0").format(cd / 20.0) + " sec";
+    }
+}
+
+class TickCoolDownHandler<E> {
+
+    private Map<E, Long> cds;
+
+    private long cooldown;
+
+    private long tickCounter;
+
+    public TickCoolDownHandler(JavaPlugin executingPlugin, long cooldown) {
+        this.cooldown = cooldown;
+        cds = new HashMap<>();
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(executingPlugin, () -> {
+            tickCounter++; // increment every tick
+        }, 1L, 1L);
+    }
+
+    public void putOnCoolDown(E e) {
+        cds.put(e, tickCounter);
+    }
+
+    public boolean onCoolDown(E e) {
+        Long lastUsed = cds.get(e);
+        if (lastUsed == null || (tickCounter - lastUsed) > cooldown) {
+            return false;
+        }
+        return true;
+    }
+
+    public long getRemainingCoolDown(E e) {
+        Long lastUsed = cds.get(e);
+        if (lastUsed == null) {
+            return 0L;
+        }
+        long leftOver = tickCounter - lastUsed;
+        if (leftOver < cooldown) {
+            return cooldown - leftOver;
+        }
+        return 0L;
+    }
+
+    public long getTotalCoolDown() {
+        return cooldown;
+    }
+
+    public void removeCooldown(E e) {
+        cds.remove(e);
     }
 
 }
