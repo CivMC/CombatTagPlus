@@ -46,6 +46,8 @@ public final class NpcListener implements Listener {
         // Attempt to despawn NPC
         Npc npc = plugin.getNpcManager().getSpawnedNpc(event.getPlayer().getUniqueId());
         if (npc != null) {
+            event.getPlayer().teleport(npc.getEntity().getLocation());
+
             plugin.getNpcManager().despawn(npc);
         }
     }

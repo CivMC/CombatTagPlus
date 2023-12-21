@@ -1,8 +1,5 @@
 package net.minelink.ctplus;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.minelink.ctplus.event.NpcDespawnEvent;
 import net.minelink.ctplus.event.NpcDespawnReason;
 import net.minelink.ctplus.task.NpcDespawnTask;
@@ -11,8 +8,11 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public final class NpcManager {
 
@@ -52,13 +52,6 @@ public final class NpcManager {
         entity.getInventory().setContents(player.getInventory().getContents());
         entity.getInventory().setArmorContents(player.getInventory().getArmorContents());
         entity.addPotionEffects(player.getActivePotionEffects());
-
-        // Should fix some visual glitches, such as health bars displaying zero
-        // TODO: Find another solution. This one causes the player to be added to the NMS PlayerList, that's not ideal.
-        entity.teleport(player, PlayerTeleportEvent.TeleportCause.PLUGIN);
-
-        // Send equipment packets to nearby players
-        plugin.getNpcPlayerHelper().updateEquipment(entity);
 
         entity.setMetadata("NPC", new FixedMetadataValue(plugin, true));
 
